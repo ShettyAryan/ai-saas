@@ -14,9 +14,8 @@ export default function Home() {
         <DemoSection />
         <HowItWorks />
         <PricingSection />
+        <CTASection />
       </div>
-
-      {/* <CTASection /> */}
     </div>
   );
 }
