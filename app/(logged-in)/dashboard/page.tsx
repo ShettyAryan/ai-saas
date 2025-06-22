@@ -1,10 +1,21 @@
 import BgGradient from "@/components/common/BgGradient";
+import SummaryCard from "@/components/summaries/SummaryCard";
 import { Button } from "@/components/ui/button";
+import { getSummaries } from "@/lib/summaries";
+import { currentUser } from "@clerk/nextjs/server";
 import { ArrowRight, Plus } from "lucide-react";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import React from "react";
+import EmptySummary from "@/components/summaries/EmptySummary";
 
-const page = () => {
+const page = async () => {
+  const user = await currentUser();
+  const userId = user?.id;
+  if (!userId) {
+    return redirect("/sign-in");
+  }
+  const summaries = await getSummaries(userId);
   return (
     <main className="min-h-screen">
       <BgGradient />
@@ -12,7 +23,7 @@ const page = () => {
         <div className="px-2 py-12 sm:py-24">
           <div className="flex gap-4 mb-8 justify-between">
             <div className="flex flex-col gap-2">
-              <h1 className="text-4xl font-bold tracking-tight bg-liner-to-r from-gray-600 to-gray-900 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-gray-600 to-gray-900 bg-clip-text text-transparent">
                 Your Summaries
               </h1>
               <p className="text-gray-600">
@@ -45,6 +56,15 @@ const page = () => {
               </p>
             </div>
           </div>
+          {summaries.length === 0 ? (
+            <EmptySummary />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 sm:px-0">
+              {summaries.map((summary, index) => (
+                <SummaryCard key={index} summary={summary} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </main>
