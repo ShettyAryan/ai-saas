@@ -95,10 +95,15 @@ async function savedPdfSummary({
     const sql = await getDbConnection();
 
     await sql`
-     INSERT INTO users (id)
+     INSERT INTO users (clerk_user_id)
      VALUES (${userId})
-     ON CONFLICT (id) DO NOTHING
+     ON CONFLICT (clerk_user_id) DO NOTHING
     `;
+
+    const [user] = await sql`
+    SELECT id FROM users WHERE clerk_user_id = ${userId}
+    `;
+    const dbUserId = user.id;
 
     const [savedSummary] = await sql`INSERT INTO pdf_summaries(
     user_id,
@@ -107,7 +112,7 @@ async function savedPdfSummary({
     title,
     file_name
     ) VALUES (
-     ${userId},
+     ${dbUserId},
      ${fileUrl},
      ${summary},
      ${title},

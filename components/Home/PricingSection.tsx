@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { plans } from "@/utils/constants";
 import { ArrowRight, CheckIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -7,36 +8,18 @@ type Plan = {
   name: string;
   price: number;
   description: string;
+  paymentLink: string;
   items: string[];
 };
 
-const plans: Plan[] = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: 9,
-    description: "Perfect for occasional use",
-    items: [
-      "5 PDF summaries per month",
-      "Standard processing speed",
-      "Email Support",
-    ],
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: 19,
-    description: "For professionals and teams",
-    items: [
-      "Unlimited PDF summaries",
-      "Priority Processing",
-      "24/7 priority support",
-      "Markdown Export",
-    ],
-  },
-];
-
-const PricingCard = ({ name, price, description, items, id }: Plan) => {
+const PricingCard = ({
+  name,
+  price,
+  description,
+  items,
+  id,
+  paymentLink,
+}: Plan) => {
   return (
     <div className="relative w-full max-w-lg hover:scale-105 hover:transition-all duration-300">
       <div
@@ -68,7 +51,7 @@ const PricingCard = ({ name, price, description, items, id }: Plan) => {
         </div>
         <div className="space-y-2 flex justify-center w-full">
           <Link
-            href={"/"}
+            href={paymentLink}
             className={cn(
               "w-full rounded-full flex items-center justify-center gap-2 bg-linear-to-r from-emerald-800 to-emerald-500 hover:from-emerald-500 hover:to-emerald-800 text-white border-2 py-2 transition duration-150",
               id === "pro"

@@ -1,66 +1,65 @@
-create extension if not exists "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Fix: Missing table name before amp
-create table users (
-  id varchar(255) primary key,
-  email varchar(255) unique,
-  full_name varchar(255),
-  customer_id varchar(255) unique,
-  price_id varchar(255),
-  status varchar(50) default 'inactive',
-  created_at timestamp with time zone default current_timestamp,
-  updated_at timestamp with time zone default current_timestamp
+-- USERS TABLE
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),      -- Internal UUID
+  clerk_user_id VARCHAR(255) UNIQUE ,          -- Clerk ID (e.g., user_abc123)
+  email VARCHAR(255) UNIQUE,
+  full_name VARCHAR(255),
+  customer_id VARCHAR(255) UNIQUE,                     -- Stripe Customer ID
+  price_id VARCHAR(255),                               -- Stripe Price ID
+  status VARCHAR(50) DEFAULT 'inactive',
+  created_at TIMESTAMPTZ DEFAULT current_timestamp,
+  updated_at TIMESTAMPTZ DEFAULT current_timestamp
 );
 
--- Table: pdf_summaries
-create table pdf_summaries (
-  id UUID primary key default uuid_generate_v4(),
-  user_id varchar(255) not null,
-  original_file_url text not null,
-  summary_text text not null,
-  status varchar(50) default 'completed',
-  title text,
-  file_name text,
-  created_at timestamp with time zone default current_timestamp,
-  updated_at timestamp with time zone default current_timestamp,
-  foreign key (user_id) references users(id)
+-- PDF_SUMMARIES TABLE
+CREATE TABLE pdf_summaries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL,                               -- FK to users.id (UUID)
+  original_file_url TEXT NOT NULL,
+  summary_text TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'completed',
+  title TEXT,
+  file_name TEXT,
+  created_at TIMESTAMPTZ DEFAULT current_timestamp,
+  updated_at TIMESTAMPTZ DEFAULT current_timestamp,
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Table: payments
-create table payments (
-  id UUID primary key default uuid_generate_v4(),
-  amount integer not null,
-  status varchar(50) not null,
-  stripe_payment_id varchar(255) unique not null,
-  price_id varchar(255) not null,
-  user_email varchar(255) not null references users(email),
-  created_at timestamp with time zone default current_timestamp,
-  updated_at timestamp with time zone default current_timestamp
+-- PAYMENTS TABLE
+CREATE TABLE payments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  amount INTEGER NOT NULL,
+  status VARCHAR(50) NOT NULL,
+  stripe_payment_id VARCHAR(255) UNIQUE NOT NULL,
+  price_id VARCHAR(255) NOT NULL,
+  user_email VARCHAR(255) NOT NULL REFERENCES users(email),
+  created_at TIMESTAMPTZ DEFAULT current_timestamp,
+  updated_at TIMESTAMPTZ DEFAULT current_timestamp
 );
 
--- Trigger function for automatic updated_at
-create or replace function update_updated_at_column()
-returns trigger as $$
-begin
-  new.updated_at = current_timestamp;
-  return new;
-end;
-$$ language plpgsql;
+-- TRIGGER FUNCTION: Auto-update 'updated_at'
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at := current_timestamp;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Triggers
-create trigger update_users_updated_at
-before update on users
-for each row
-execute function update_updated_at_column();
+-- TRIGGERS
+CREATE TRIGGER update_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
-create trigger update_pdf_summaries_updated_at
-before update on pdf_summaries
-for each row
-execute function update_updated_at_column();
+CREATE TRIGGER update_pdf_summaries_updated_at
+BEFORE UPDATE ON pdf_summaries
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
-create trigger update_payments_updated_at
-before update on payments
-for each row
-execute function update_updated_at_column();
-
-
+CREATE TRIGGER update_payments_updated_at
+BEFORE UPDATE ON payments
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
