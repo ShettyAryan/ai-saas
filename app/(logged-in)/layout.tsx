@@ -1,20 +1,26 @@
-"use client";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { hasActivePlan } from "@/lib/user";
+import UpgradeRequired from "@/components/common/UpgradeRequired";
+import LoggedInClientLayout from "./_components/LoggedInClientLayout";
 
-import { useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
-
-export default function LoggedInLayout({
+export default async function LoggedInLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isSignedIn } = useUser();
+  const user = await currentUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetch("/api/sync-user").catch(console.error);
-    }
-  }, [isSignedIn]);
+  const hasActiveSubscription = await hasActivePlan(
+    user.emailAddresses[0].emailAddress
+  );
 
-  return <>{children}</>;
+  if (!hasActiveSubscription) {
+    return <UpgradeRequired />;
+  }
+
+  return <LoggedInClientLayout>{children}</LoggedInClientLayout>;
 }
