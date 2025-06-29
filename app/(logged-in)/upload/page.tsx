@@ -10,6 +10,8 @@ import { redirect } from "next/navigation";
 
 import React from "react";
 
+export const maxDuration = 60;
+
 const page = async () => {
   const user = await currentUser();
 
