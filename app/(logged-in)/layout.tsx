@@ -18,7 +18,7 @@ export default async function LoggedInLayout({
     user.emailAddresses[0].emailAddress
   );
 
-  if (!hasActiveSubscription) {
+  if (hasActiveSubscription) {
     return <UpgradeRequired />;
   }
 
