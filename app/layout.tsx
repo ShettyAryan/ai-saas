@@ -16,6 +16,31 @@ export const metadata: Metadata = {
   title: "Summuro - AI Powered PDF Summarization",
   description:
     "Save hours of reading time. Transform lengthy PDFs into clear, accurate summaries in seconds with our advanced AI technology",
+
+  openGraph: {
+    title: "Summuro - AI Powered PDF Summarization",
+    description:
+      "Transform lengthy PDFs into clear, accurate summaries in seconds ",
+    url: "https://summuro-ai.vercel.app",
+    siteName: "Summuro AI",
+    images: [
+      {
+        url: "/public/opengraphImageSaas.png", // <-- Preview image
+        width: 1200,
+        height: 630,
+        alt: "Website preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Summuro AI",
+    description:
+      "Transform lengthy PDFs into clear, accurate summaries in seconds",
+    images: ["/public/opengraphImageSaas.png"],
+  },
 };
 
 export default function RootLayout({
