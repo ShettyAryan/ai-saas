@@ -82,6 +82,8 @@ const PricingCard = ({
         >
           <Link
             href={paymentLink}
+            target="_blank"
+            rel="noopener noreferrer"
             className={cn(
               "w-full rounded-full flex items-center justify-center gap-2 bg-linear-to-r from-emerald-800 to-emerald-500 hover:from-emerald-500 hover:to-emerald-800 text-white border-2 py-2 transition duration-150",
               id === "pro"
