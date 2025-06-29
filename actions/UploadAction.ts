@@ -7,35 +7,14 @@ import { formatFileNameAsTitle } from "@/utils/formatUtils";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
-export async function generatePdfSummary(
-  uploadResponse: [
-    {
-      serverData: {
-        userId: string;
-        file: {
-          ufsUrl: string;
-          name: string;
-        };
-      };
-    }
-  ]
-) {
-  if (!uploadResponse) {
-    return {
-      success: false,
-      message: "File upload failed",
-      data: null,
-    };
-  }
-
-  const {
-    serverData: {
-      userId,
-      file: { ufsUrl: pdfUrl, name: fileName },
-    },
-  } = uploadResponse[0];
-
-  if (!pdfUrl) {
+export async function generatePdfText({
+  fileUrl,
+  fileName,
+}: {
+  fileUrl: string;
+  fileName: string;
+}) {
+  if (!fileUrl) {
     return {
       success: false,
       message: "File upload failed",
@@ -44,9 +23,40 @@ export async function generatePdfSummary(
   }
 
   try {
-    const pdfText = await fetchAndExtractPdfText(pdfUrl);
+    const pdfText = await fetchAndExtractPdfText(fileUrl);
     console.log({ pdfText });
 
+    if (!pdfText) {
+      return {
+        success: false,
+        message: "Failed to fetch and extract text",
+        data: null,
+      };
+    }
+
+    const formattedFileName = formatFileNameAsTitle(fileName);
+
+    return {
+      success: true,
+      message: "PDF text fetched successfully",
+      data: {
+        title: formattedFileName,
+        pdfText,
+      },
+    };
+  } catch (error) {
+    return { success: false, message: "File upload failed", data: null };
+  }
+}
+
+export async function generatePdfSummary({
+  pdfText,
+  fileName,
+}: {
+  pdfText: string;
+  fileName: string;
+}) {
+  try {
     let summary;
 
     try {
@@ -63,18 +73,20 @@ export async function generatePdfSummary(
       };
     }
 
-    const formattedFileName = formatFileNameAsTitle(fileName);
-
     return {
       success: true,
       message: "Summary generated successfully",
       data: {
-        title: formattedFileName,
+        title: fileName,
         summary,
       },
     };
   } catch (error) {
-    return { success: false, message: "File upload failed", data: null };
+    return {
+      success: false,
+      message: "Failed to generate summary",
+      data: null,
+    };
   }
 }
 

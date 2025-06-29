@@ -6,6 +6,7 @@ import { useUploadThing } from "@/utils/uploadthing";
 import { toast } from "sonner";
 import {
   generatePdfSummary,
+  generatePdfText,
   storePdfSummaryAction,
 } from "@/actions/UploadAction";
 import { useRouter } from "next/navigation";
@@ -83,32 +84,50 @@ const UploadForm = () => {
         description: "Hang tight! Our AI is reading through your document",
       });
 
-      const result = await generatePdfSummary(resp);
+      let storeResult: any;
+      toast("Saving PDF", {
+        description: "Hang tight! We are saving your summary!",
+      });
 
-      const { data = null, message = null } = result || {};
+      formRef.current?.reset();
 
-      if (data) {
-        let storeResult: any;
-        toast("Saving PDF", {
-          description: "Hang tight! We are saving your summary!",
+      //call ai service
+
+      const result = await generatePdfText({
+        fileUrl: resp[0].serverData.file.ufsUrl,
+        fileName: file.name,
+      });
+
+      toast("Generating PDF Summary", {
+        description: "Hang tight! We are generating your summary!",
+      });
+
+      const summaryResult = await generatePdfSummary({
+        pdfText: result?.data?.pdfText ?? "",
+        fileName: file.name,
+      });
+
+      toast("Saving PDF Summary", {
+        description: "Hang tight! We are saving your summary!",
+      });
+
+      const { data = null, message = null } = summaryResult || {};
+
+      if (data?.summary) {
+        //save the summary to the database
+        storeResult = await storePdfSummaryAction({
+          fileUrl: resp[0].serverData.file.ufsUrl,
+          summary: data.summary,
+          title: data.title,
+          fileName: file.name,
+        });
+
+        toast("Summary saved", {
+          description: "Your Summary has been summarised and saved!",
         });
 
         formRef.current?.reset();
-        if (data.summary) {
-          storeResult = await storePdfSummaryAction({
-            fileUrl: resp[0].serverData.file.ufsUrl,
-            summary: data.summary,
-            title: data.title,
-            fileName: file.name,
-          });
-
-          toast("Summary saved", {
-            description: "Your Summary has been summarised and saved!",
-          });
-
-          formRef.current?.reset();
-          router.push(`/summaries/${storeResult.data.id}`);
-        }
+        router.push(`/summaries/${storeResult.data.id}`);
       }
     } catch (error) {
       setIsLoading(false);
