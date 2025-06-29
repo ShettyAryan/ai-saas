@@ -94,7 +94,7 @@ const UploadForm = () => {
       //call ai service
 
       const result = await generatePdfText({
-        fileUrl: resp[0].serverData.file.ufsUrl,
+        fileUrl: resp[0].serverData.file.url,
         fileName: file.name,
       });
 
@@ -116,7 +116,7 @@ const UploadForm = () => {
       if (data?.summary) {
         //save the summary to the database
         storeResult = await storePdfSummaryAction({
-          fileUrl: resp[0].serverData.file.ufsUrl,
+          fileUrl: resp[0].serverData.file.url,
           summary: data.summary,
           title: data.title,
           fileName: file.name,

@@ -1,6 +1,6 @@
 import React from "react";
 import { FileText } from "lucide-react";
-import { Button } from "../ui/button";
+
 import Navlink from "./Navlink";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import PlanBadge from "./PlanBadge";
